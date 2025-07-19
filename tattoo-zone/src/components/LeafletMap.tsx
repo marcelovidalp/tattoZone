@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -24,6 +24,9 @@ interface LeafletMapProps {
     lat: number;
     lng: number;
     style: string;
+    rating?: number;
+    distance?: string;
+    phone?: string;
   }>;
 }
 
@@ -44,12 +47,41 @@ const LeafletMap: React.FC<LeafletMapProps> = ({ center, zoom, tattooers = [] })
         <Marker 
           key={tattooer.id}
           position={[tattooer.lat, tattooer.lng]}
+          icon={defaultIcon}
         >
-          <Popup>
-            <div>
+          {/* Tooltip permanente que muestra el nombre */}
+          <Tooltip 
+            permanent={true}
+            direction="top"
+            offset={[0, -40]}
+            className="tattooer-tooltip"
+          >
+            <div className="tooltip-content">
               <strong>{tattooer.name}</strong>
               <br />
-              Especialista en {tattooer.style}
+              <span>{tattooer.style}</span>
+            </div>
+          </Tooltip>
+          
+          {/* Popup que aparece al hacer click para más información */}
+          <Popup>
+            <div className="popup-content">
+              <h4>{tattooer.name}</h4>
+              <p><strong>Especialidad:</strong> {tattooer.style}</p>
+              {tattooer.rating && (
+                <p><strong>Rating:</strong> ⭐ {tattooer.rating}/5</p>
+              )}
+              {tattooer.distance && (
+                <p><strong>Distancia:</strong> 📍 {tattooer.distance}</p>
+              )}
+              {tattooer.phone && (
+                <button 
+                  className="popup-contact-btn"
+                  onClick={() => window.open(`whatsapp://send?phone=${tattooer.phone}&text=Hola ${tattooer.name}, vi tu perfil en TattooZone`, '_blank')}
+                >
+                  💬 WhatsApp
+                </button>
+              )}
             </div>
           </Popup>
         </Marker>
