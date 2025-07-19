@@ -37,9 +37,9 @@ function App() {
       style: 'Realismo',
       distance: '2.5 km',
       rating: 4.8,
-      phone: '+5491123456789',
-      lat: -34.6037,
-      lng: -58.3816,
+      phone: '+56912345789',
+      lat: -38.7359, // Centro de Temuco
+      lng: -72.5904,
     },
     {
       id: 2,
@@ -47,9 +47,9 @@ function App() {
       style: 'Tradicional',
       distance: '3.1 km',
       rating: 4.9,
-      phone: '+5491123456790',
-      lat: -34.6118,
-      lng: -58.3960,
+      phone: '+56912345790',
+      lat: -38.7280, // Zona norte de Temuco (cerca del Mall Mirage)
+      lng: -72.5850,
     },
     {
       id: 3,
@@ -57,19 +57,19 @@ function App() {
       style: 'Minimalista',
       distance: '1.8 km',
       rating: 4.7,
-      phone: '+5491123456791',
-      lat: -34.5998,
-      lng: -58.3731,
+      phone: '+56912345791',
+      lat: -38.7420, // Zona sur de Temuco
+      lng: -72.5980,
     },
-        {
+    {
       id: 4,
       name: 'Ana Torres',
       style: 'Blackwork',
       distance: '4.2 km',
       rating: 4.6,
       phone: '+56912345681',
-      lat: -38.7500,
-      lng: -72.6200,
+      lat: -38.7250, // Zona Pedro de Valdivia
+      lng: -72.6100,
     },
     {
       id: 5,
@@ -78,11 +78,11 @@ function App() {
       distance: '5.1 km',
       rating: 4.9,
       phone: '+56912345682',
-      lat: -38.7150,
-      lng: -72.5650,
+      lat: -38.7480, // Zona Las Quilas
+      lng: -72.5750,
     },
   ];
-
+  
   // Función para contactar por WhatsApp
   const contactTattooer = (phone: string, name: string) => {
     const message = `Hola ${name}, vi tu perfil en TattooZone y me interesa tu trabajo.`;
