@@ -5,17 +5,24 @@
   padding: 0;
 }
 
+body {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
 /* Layout principal */
 .app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: #121212;
 }
 
 /* Header */
 .header {
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #333;
   padding: 1rem;
+  background-color: #1e1e1e;
 }
 
 .header-content {
@@ -29,6 +36,7 @@
 .logo {
   font-size: 1.5rem;
   font-weight: bold;
+  color: #fff;
 }
 
 .nav {
@@ -40,6 +48,7 @@
 .main {
   flex: 1;
   display: flex;
+  background-color: #121212;
 }
 
 .main-content {
@@ -57,7 +66,7 @@
 
 .map-placeholder {
   height: 100%;
-  border: 2px dashed #ccc;
+  border: 2px dashed #555;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -65,11 +74,11 @@
   gap: 1rem;
   padding: 2rem;
   text-align: center;
-  background: #f9f9f9;
+  background: #1e1e1e;
 }
 
 .map-placeholder h3 {
-  color: #666;
+  color: #b0b0b0;
   margin-bottom: 0.5rem;
 }
 
@@ -84,6 +93,7 @@
   border-color: #4CAF50;
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
+  border-radius: 4px;
 }
 
 .location-btn:hover {
@@ -93,23 +103,24 @@
 .location-info {
   margin-top: 1rem;
   padding: 1rem;
-  background: white;
-  border: 1px solid #ddd;
+  background: #2a2a2a;
+  border: 1px solid #444;
   border-radius: 4px;
   text-align: left;
 }
 
 .location-info p {
   margin: 0.25rem 0;
-  color: #333;
+  color: #e0e0e0;
 }
 
 /* Sidebar */
 .sidebar {
   flex: 1;
   padding: 1rem;
-  border-left: 1px solid #ccc;
+  border-left: 1px solid #333;
   max-width: 350px;
+  background-color: #1e1e1e;
 }
 
 .search-section,
@@ -117,7 +128,7 @@
 .results-section {
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #333;
 }
 
 .search-input,
@@ -125,8 +136,16 @@
   width: 100%;
   padding: 0.5rem;
   margin: 0.5rem 0;
-  border: 1px solid #ccc;
+  border: 1px solid #444;
   border-radius: 4px;
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+}
+
+.search-input:focus,
+.filter-select:focus {
+  outline: none;
+  border-color: #4CAF50;
 }
 
 .filter-group {
@@ -137,24 +156,26 @@
   display: block;
   margin-bottom: 0.25rem;
   font-weight: bold;
+  color: #e0e0e0;
 }
 
 /* Tarjetas */
 .card {
-  border: 1px solid #ccc;
+  border: 1px solid #333;
   padding: 1rem;
   margin-bottom: 0.5rem;
   border-radius: 4px;
-  background: white;
+  background: #2a2a2a;
 }
 
 .tattooer-card h5 {
   margin-bottom: 0.5rem;
+  color: #fff;
 }
 
 .tattooer-card p {
   margin-bottom: 0.25rem;
-  color: #666;
+  color: #b0b0b0;
 }
 
 .card-actions {
@@ -166,14 +187,15 @@
 /* Botones básicos */
 .btn {
   padding: 0.5rem 1rem;
-  border: 1px solid #333;
-  background: white;
+  border: 1px solid #555;
+  background: #2a2a2a;
+  color: #e0e0e0;
   cursor: pointer;
   border-radius: 4px;
 }
 
 .btn:hover {
-  background: #f5f5f5;
+  background: #3a3a3a;
 }
 
 .nav-btn {
@@ -192,10 +214,11 @@
 
 /* Footer */
 .footer {
-  border-top: 1px solid #ccc;
+  border-top: 1px solid #333;
   padding: 1rem;
   text-align: center;
-  color: #666;
+  color: #888;
+  background-color: #1e1e1e;
 }
 
 /* Responsive */
@@ -206,7 +229,7 @@
   
   .sidebar {
     border-left: none;
-    border-top: 1px solid #ccc;
+    border-top: 1px solid #333;
     max-width: none;
   }
   
