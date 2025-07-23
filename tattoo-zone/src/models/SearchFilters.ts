@@ -15,7 +15,7 @@ export class SearchFilters {
   constructor(
     searchTerm: string = '',
     selectedStyle: TattooStyle = new TattooStyle(TattooStyleEnum.TODOS, 'Todos los estilos'),
-    maxDistance: number = 5,
+    maxDistance: number = 50, // Aumentar el valor por defecto
     minRating: number = 0
   ) {
     this.searchTerm = searchTerm;
@@ -30,18 +30,18 @@ export class SearchFilters {
    */
   applyFilters(tattooers: Tattooer[]): Tattooer[] {
     return tattooers.filter(tattooer => {
-      // Filtro por término de búsqueda
+      // Filtro por término de búsqueda (solo si hay término)
       if (this.searchTerm && !this.matchesSearchTerm(tattooer)) {
         return false;
       }
 
-      // Filtro por estilo
+      // Filtro por estilo (solo si no es "Todos")
       if (this.selectedStyle.name !== TattooStyleEnum.TODOS && 
           !tattooer.specializesIn(this.selectedStyle)) {
         return false;
       }
 
-      // Filtro por distancia
+      // Filtro por distancia (solo si hay ubicación del usuario)
       if (this.userLocation && 
           tattooer.getDistanceFrom(this.userLocation) > this.maxDistance) {
         return false;
@@ -53,6 +53,13 @@ export class SearchFilters {
       }
 
       return true;
+    }).sort((a, b) => {
+      // Si hay ubicación del usuario, ordenar por distancia
+      if (this.userLocation) {
+        return a.getDistanceFrom(this.userLocation) - b.getDistanceFrom(this.userLocation);
+      }
+      // Si no hay ubicación, ordenar por rating descendente
+      return b.rating - a.rating;
     });
   }
 

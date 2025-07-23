@@ -84,9 +84,35 @@ export class TattooZoneService {
 
   /**
    * Busca tatuadores aplicando los filtros actuales
+   * Si no hay filtros activos, devuelve todos los tatuadores
    */
   searchTattooers(): Tattooer[] {
-    return this.filters.applyFilters(this.getAllTattooers());
+    const allTattooers = this.getAllTattooers();
+    
+    // Si no hay criterios de búsqueda activos, devolver todos
+    if (!this.hasActiveFilters()) {
+      return allTattooers;
+    }
+    
+    return this.filters.applyFilters(allTattooers);
+  }
+
+  /**
+   * Verifica si hay filtros activos
+   */
+  private hasActiveFilters(): boolean {
+    return !!(
+      this.filters.searchTerm ||
+      (this.filters.selectedStyle && this.filters.selectedStyle.name !== TattooStyleEnum.TODOS) ||
+      this.filters.userLocation
+    );
+  }
+
+  /**
+   * Reinicia los filtros a su estado inicial
+   */
+  resetFilters(): void {
+    this.filters = new SearchFilters();
   }
 
   /**

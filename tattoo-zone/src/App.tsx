@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import './App.css';
-import GoogleMap from './components/GoogleMap'; // Cambiar importación
+import './styles/App.css';
+import './styles/components/Sidebar.css';
+import LeafletMap from './components/LeafletMap';
+import TattooerProfileSidebar from './components/TattooerProfileSidebar';
 import TattooerProfile from './components/TattooerProfile';
-// Importaciones de nuestras clases
-import { TattooZoneService } from './services/TattooZoneService';
-import { Location } from './models/Location';
+import { TattooZoneApp } from './models/TattooZoneApp';
+import { User } from './models/User';
 import { Tattooer } from './models/Tattooer';
-import { TattooStyle, TattooStyleEnum } from './models/TattooStyle';
+import { TattooStyleEnum } from './models/TattooStyle';
 
 /**
  * Componente principal de la aplicación TattooZone con routing
@@ -26,100 +27,109 @@ function App() {
 }
 
 /**
- * Componente de la página principal (contenido original de App)
+ * Componente de la página principal usando la arquitectura orientada a objetos
  */
 function HomePage() {
   const navigate = useNavigate();
   
-  // Estados principales de la aplicación
-  const [currentLocation, setCurrentLocation] = useState<Location | null>(null);
+  // Instancia principal de la aplicación (siguiendo el diagrama de clases)
+  const [tattooZoneApp] = useState(() => new TattooZoneApp());
+  
+  // Estados de la UI
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStyle, setSelectedStyle] = useState(TattooStyleEnum.TODOS);
   const [selectedDistance, setSelectedDistance] = useState('5');
   const [filteredTattooers, setFilteredTattooers] = useState<Tattooer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedTattooerForSidebar, setSelectedTattooerForSidebar] = useState<Tattooer | null>(null);
+  const [showProfileSidebar, setShowProfileSidebar] = useState(false);
 
-  // Instancia del servicio principal
-  const [tattooService] = useState(() => new TattooZoneService());
-  const [availableStyles] = useState(() => TattooStyle.getAllStyles());
+  // Estados derivados de la aplicación principal
+  const currentUser = tattooZoneApp.currentUser;
+  const userLocation = tattooZoneApp.userLocation;
+  const availableStyles = tattooZoneApp.getAvailableStyles();
 
   /**
-   * Efecto para cargar tatuadores iniciales y aplicar filtros
+   * Efecto para cargar tatuadores iniciales al montar el componente
    */
   useEffect(() => {
-    updateFilteredTattooers();
-  }, [searchTerm, selectedStyle, selectedDistance, currentLocation]);
+    // Cargar todos los tatuadores al inicio sin filtros
+    try {
+      const allTattooers = tattooZoneApp.getAllTattooers();
+      setFilteredTattooers(allTattooers);
+    } catch (error) {
+      console.error('Error cargando tatuadores:', error);
+      setFilteredTattooers([]);
+    }
+  }, [tattooZoneApp]); // Agregar tattooZoneApp como dependencia
 
   /**
-   * Actualiza la lista de tatuadores basado en los filtros actuales
+   * Efecto para aplicar filtros cuando cambian los parámetros de búsqueda
+   */
+  useEffect(() => {
+    // Solo aplicar filtros si hay algún criterio de búsqueda activo
+    if (searchTerm || selectedStyle !== TattooStyleEnum.TODOS || userLocation) {
+      updateFilteredTattooers();
+    } else {
+      // Si no hay filtros activos, mostrar todos los tatuadores
+      try {
+        const allTattooers = tattooZoneApp.getAllTattooers();
+        setFilteredTattooers(allTattooers);
+      } catch (error) {
+        console.error('Error cargando tatuadores:', error);
+        setFilteredTattooers([]);
+      }
+    }
+  }, [searchTerm, selectedStyle, selectedDistance, userLocation, tattooZoneApp]);
+
+  /**
+   * Actualiza la lista de tatuadores usando la lógica de la aplicación principal
    */
   const updateFilteredTattooers = () => {
-    // Actualizar filtros en el servicio
-    const styleFilter = availableStyles.find(s => s.name === selectedStyle) || 
-                       new TattooStyle(TattooStyleEnum.TODOS, 'Todos los estilos');
-    
-    tattooService.updateFilters({
-      searchTerm,
-      selectedStyle: styleFilter,
-      maxDistance: parseInt(selectedDistance),
-      userLocation: currentLocation
-    });
+    try {
+      // Actualizar filtros en la aplicación principal
+      const styleFilter = availableStyles.find(s => s.name === selectedStyle) || 
+                         availableStyles[0];
+      
+      tattooZoneApp.updateFilters({
+        searchTerm,
+        selectedStyle: styleFilter,
+        maxDistance: parseInt(selectedDistance),
+        userLocation: tattooZoneApp.userLocation
+      });
 
-    // Obtener tatuadores filtrados
-    const filtered = tattooService.searchTattooers();
-    
-    // Si hay ubicación del usuario, calcular distancias y ordenar por proximidad
-    if (currentLocation) {
-      filtered.sort((a, b) => 
-        a.getDistanceFrom(currentLocation) - b.getDistanceFrom(currentLocation)
-      );
+      // Obtener tatuadores filtrados usando el método de la aplicación
+      const filtered = tattooZoneApp.searchTattooers();
+      setFilteredTattooers(filtered);
+    } catch (error) {
+      console.error('Error filtrando tatuadores:', error);
+      setFilteredTattooers([]);
     }
-
-    setFilteredTattooers(filtered);
   };
 
   /**
-   * Obtiene la ubicación actual del usuario usando geolocalización
+   * Obtiene la ubicación usando el método de la aplicación principal
    */
-  const getCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      alert('Geolocalización no soportada en este navegador');
-      return;
-    }
-
+  const getCurrentLocation = async () => {
     setIsLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const newLocation = new Location(
-          position.coords.latitude,
-          position.coords.longitude,
-          'Mi ubicación'
-        );
-        
-        setCurrentLocation(newLocation);
-        tattooService.setUserLocation(newLocation);
-        
-        setIsLoading(false);
-        alert(`Ubicación obtenida: ${newLocation.toString()}`);
-      },
-      (error) => {
-        console.error('Error obteniendo ubicación:', error);
-        setIsLoading(false);
-        alert('No se pudo obtener la ubicación. Verifique los permisos del navegador.');
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 60000
-      }
-    );
+    
+    try {
+      await tattooZoneApp.getCurrentLocation();
+      alert(`Ubicación obtenida: ${tattooZoneApp.userLocation?.toString()}`);
+      updateFilteredTattooers(); // Actualizar lista con nueva ubicación
+    } catch (error) {
+      console.error('Error obteniendo ubicación:', error);
+      alert('No se pudo obtener la ubicación. Verifique los permisos del navegador.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   /**
-   * Maneja el contacto con un tatuador vía WhatsApp
+   * Maneja el contacto con un tatuador usando la aplicación principal
    */
   const handleContactTattooer = (tattoerId: number) => {
-    tattooService.contactTattooer(tattoerId);
+    tattooZoneApp.contactTattooer(tattoerId);
   };
 
   /**
@@ -130,8 +140,8 @@ function HomePage() {
       id: tattooer.id,
       name: tattooer.name,
       style: tattooer.getPrimaryStyle().name,
-      distance: currentLocation ? 
-        `${tattooer.getDistanceFrom(currentLocation).toFixed(1)} km` : 
+      distance: userLocation ? 
+        `${tattooer.getDistanceFrom(userLocation).toFixed(1)} km` : 
         'Distancia desconocida',
       rating: tattooer.rating,
       phone: tattooer.phone,
@@ -141,19 +151,34 @@ function HomePage() {
   };
 
   // Centro del mapa basado en ubicación del usuario o valor por defecto
-  const mapCenter = currentLocation 
-    ? { lat: currentLocation.lat, lng: currentLocation.lng }
-    : { lat: -38.7359, lng: -72.5904 }; // Temuco por defecto
-
-  const userLocationForMap = currentLocation 
-    ? { lat: currentLocation.lat, lng: currentLocation.lng }
-    : null;
+  const mapCenter: [number, number] = userLocation 
+    ? [userLocation.lat, userLocation.lng]
+    : [-38.7359, -72.5904]; // Temuco por defecto
 
   /**
-   * Navega al perfil de un tatuador
+   * Navega al perfil de un tatuador (página completa)
    */
   const handleViewProfile = (tattoerId: number) => {
     navigate(`/tattooer/${tattoerId}`);
+  };
+
+  /**
+   * Muestra el perfil del tatuador en el sidebar (mantiene el mapa visible)
+   */
+  const handleViewProfileSidebar = (tattoerId: number) => {
+    const tattooer = tattooZoneApp.getTattooerById(tattoerId);
+    if (tattooer) {
+      setSelectedTattooerForSidebar(tattooer);
+      setShowProfileSidebar(true);
+    }
+  };
+
+  /**
+   * Cierra el sidebar del perfil
+   */
+  const closeProfileSidebar = () => {
+    setShowProfileSidebar(false);
+    setSelectedTattooerForSidebar(null);
   };
 
   return (
@@ -163,24 +188,39 @@ function HomePage() {
         <div className="header-content">
           <h1 className="logo">TattooZone</h1>
           <nav className="nav">
-            <button className="btn nav-btn">Iniciar Sesión</button>
-            <button className="btn nav-btn">Registro</button>
+            {currentUser ? (
+              <div className="user-info">
+                <span>Hola, {currentUser.name}</span>
+                <button className="btn nav-btn" onClick={() => tattooZoneApp.logout()}>
+                  Cerrar Sesión
+                </button>
+              </div>
+            ) : (
+              <>
+                <button className="btn nav-btn">Iniciar Sesión</button>
+                <button className="btn nav-btn">Registro</button>
+              </>
+            )}
           </nav>
         </div>
       </header>
 
       <main className="main">
-        <div className="main-content">
-          {/* Sección del mapa con Google Maps */}
+        <div className={`main-content ${showProfileSidebar ? 'with-profile-sidebar' : ''}`}>
+          {/* Sección del mapa con Leaflet - VISIBLE */}
           <section className="map-section">
-            <GoogleMap 
+            <LeafletMap 
               center={mapCenter}
               zoom={13}
               tattooers={convertTattooersForMap(filteredTattooers)}
-              userLocation={userLocationForMap}
             />
             {/* Botón de ubicación superpuesto */}
-            <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 1000 }}>
+            <div style={{ 
+              position: 'absolute', 
+              top: '10px', 
+              left: '10px', 
+              zIndex: 1000 
+            }}>
               <button 
                 className={`btn location-btn ${isLoading ? 'loading' : ''}`}
                 onClick={getCurrentLocation}
@@ -191,7 +231,7 @@ function HomePage() {
             </div>
           </section>
 
-          {/* Panel lateral con búsqueda y filtros */}
+          {/* Panel lateral con búsqueda y filtros - SCROLLEABLE */}
           <aside className="sidebar">
             {/* Sección de búsqueda */}
             <div className="search-section">
@@ -236,14 +276,14 @@ function HomePage() {
                   className="filter-select"
                   value={selectedDistance}
                   onChange={(e) => setSelectedDistance(e.target.value)}
-                  disabled={!currentLocation}
+                  disabled={!userLocation}
                 >
                   <option value="5">5 km</option>
                   <option value="10">10 km</option>
                   <option value="25">25 km</option>
                   <option value="50">50 km</option>
                 </select>
-                {!currentLocation && (
+                {!userLocation && (
                   <small style={{ color: '#666', fontSize: '0.8em' }}>
                     Requiere ubicación del usuario
                   </small>
@@ -251,11 +291,11 @@ function HomePage() {
               </div>
             </div>
 
-            {/* Sección de resultados */}
+            {/* Sección de resultados actualizada */}
             <div className="results-section">
               <h4>
                 Tatuadores Encontrados ({filteredTattooers.length})
-                {currentLocation && ' - Ordenados por distancia'}
+                {userLocation && ' - Ordenados por distancia'}
               </h4>
               
               <div className="tattooer-list">
@@ -269,11 +309,13 @@ function HomePage() {
                       <h5>{tattooer.name}</h5>
                       <p>Especialista en {tattooer.getPrimaryStyle().name}</p>
                       
-                      {/* Información de distancia */}
+                      {/* Información de distancia usando el usuario actual */}
                       <p>📍 {
-                        currentLocation 
-                          ? `${tattooer.getDistanceFrom(currentLocation).toFixed(1)} km`
-                          : tattooer.location.address || 'Ubicación disponible'
+                        currentUser && currentUser.hasLocation()
+                          ? `${currentUser.getDistanceToTattooer(tattooer)?.toFixed(1)} km`
+                          : userLocation 
+                            ? `${tattooer.getDistanceFrom(userLocation).toFixed(1)} km`
+                            : tattooer.location.address || 'Ubicación disponible'
                       }</p>
                       
                       <p>⭐ {tattooer.rating}/5</p>
@@ -283,7 +325,7 @@ function HomePage() {
                       <div className="card-actions">
                         <button 
                           className="btn"
-                          onClick={() => handleViewProfile(tattooer.id)}
+                          onClick={() => handleViewProfileSidebar(tattooer.id)} // Usa sidebar
                         >
                           Ver Perfil
                         </button>
@@ -299,6 +341,16 @@ function HomePage() {
                 )}
               </div>
             </div>
+
+            {/* Sidebar del perfil */}
+            {showProfileSidebar && selectedTattooerForSidebar && (
+              <TattooerProfileSidebar
+                tattooer={selectedTattooerForSidebar}
+                userLocation={userLocation}
+                onClose={closeProfileSidebar}
+                onContact={() => handleContactTattooer(selectedTattooerForSidebar.id)}
+              />
+            )}
           </aside>
         </div>
       </main>
