@@ -1,0 +1,144 @@
+/* Reset y estilos básicos */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+/* Layout principal */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #121212;
+}
+
+/* Header */
+.header {
+  border-bottom: 1px solid #333;
+  padding: 1rem;
+  background-color: #1e1e1e;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+.nav {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Main content */
+.main {
+  flex: 1;
+  display: flex;
+  background-color: #121212;
+  min-height: calc(100vh - 140px); /* Ajustar para header y footer */
+}
+
+.main-content {
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100%;
+}
+
+/* Área del mapa - VISIBLE Y FIJO */
+.map-section {
+  flex: 2;
+  min-height: calc(100vh - 140px);
+  height: calc(100vh - 140px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Botones básicos */
+.btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #555;
+  background: #2a2a2a;
+  color: #e0e0e0;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  background: #3a3a3a;
+}
+
+.nav-btn {
+  padding: 0.25rem 0.75rem;
+}
+
+.btn-contact {
+  background: #25d366;
+  color: white;
+  border-color: #25d366;
+}
+
+.btn-contact:hover {
+  background: #128c7e;
+}
+
+.location-btn {
+  background: #4CAF50;
+  color: white;
+  border-color: #4CAF50;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 4px;
+}
+
+.location-btn:hover {
+  background: #45a049;
+}
+
+/* Footer */
+.footer {
+  border-top: 1px solid #333;
+  padding: 1rem;
+  text-align: center;
+  color: #888;
+  background-color: #1e1e1e;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .main {
+    flex-direction: column;
+    min-height: auto;
+  }
+  
+  .map-section {
+    min-height: 50vh;
+    height: 50vh;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .nav {
+    width: 100%;
+    justify-content: center;
+  }
+}
