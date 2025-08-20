@@ -1,5 +1,5 @@
-import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Tooltip } from 'react-leaflet';
+import React, { useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import '../styles/components/LeafletMap.css';
@@ -32,6 +32,19 @@ interface LeafletMapProps {
 }
 
 const LeafletMap: React.FC<LeafletMapProps> = ({ center, zoom, tattooers = [] }) => {
+  // Forzar recalculo de tamaño al montar (fix iOS Safari contenedor dinámico)
+  const InvalidateSizeOnMount: React.FC = () => {
+    const map = useMap();
+    useEffect(() => {
+      // pequeño timeout para asegurar que el contenedor tiene altura
+      const t = setTimeout(() => {
+        map.invalidateSize();
+      }, 50);
+      return () => clearTimeout(t);
+    }, [map]);
+    return null;
+  };
+
   return (
     <MapContainer 
       center={center} 
@@ -39,6 +52,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({ center, zoom, tattooers = [] })
       style={{ height: '100%', width: '100%' }}
       className="leaflet-map"
     >
+      <InvalidateSizeOnMount />
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -78,7 +92,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({ center, zoom, tattooers = [] })
               {tattooer.phone && (
                 <button 
                   className="popup-contact-btn"
-                  onClick={() => window.open(`whatsapp://send?phone=${tattooer.phone}&text=Hola ${tattooer.name}, vi tu perfil en TattooZone`, '_blank')}
+                  onClick={() => window.open(`whatsapp://send?phone=${tattooer.phone}&text=Hola ${tattooer.name}, vi tu perfil en Tinta Conectada`, '_blank')}
                 >
                   💬 WhatsApp
                 </button>

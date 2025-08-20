@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import './styles/App.css';
 import './styles/components/Sidebar.css';
@@ -6,12 +6,12 @@ import LeafletMap from './components/LeafletMap';
 import TattooerProfileSidebar from './components/TattooerProfileSidebar';
 import TattooerProfile from './components/TattooerProfile';
 import { TattooZoneApp } from './models/TattooZoneApp';
-import { User } from './models/User';
+// import { User } from './models/User'; // Removido por no uso
 import { Tattooer } from './models/Tattooer';
 import { TattooStyleEnum } from './models/TattooStyle';
 
 /**
- * Componente principal de la aplicación TattooZone con routing
+ * Componente principal de la aplicación Tinta Conectada con routing
  */
 function App() {
   return (
@@ -50,6 +50,39 @@ function HomePage() {
   const availableStyles = tattooZoneApp.getAvailableStyles();
 
   /**
+   * Actualiza la lista de tatuadores usando la lógica de la aplicación principal
+   * Memoizado para cumplir reglas de dependencias de hooks
+   */
+  const updateFilteredTattooers = useCallback(() => {
+    try {
+      // Actualizar filtros en la aplicación principal
+      const styleFilter =
+        availableStyles.find((s) => s.name === selectedStyle) || availableStyles[0];
+
+      tattooZoneApp.updateFilters({
+        searchTerm,
+        selectedStyle: styleFilter,
+        maxDistance: parseInt(selectedDistance),
+        userLocation: tattooZoneApp.userLocation,
+      });
+
+      // Obtener tatuadores filtrados usando el método de la aplicación
+      const filtered = tattooZoneApp.searchTattooers();
+      setFilteredTattooers(filtered);
+    } catch (error) {
+      console.error('Error filtrando tatuadores:', error);
+      setFilteredTattooers([]);
+    }
+  }, [
+    availableStyles,
+    selectedStyle,
+    searchTerm,
+    selectedDistance,
+    tattooZoneApp,
+    tattooZoneApp.userLocation,
+  ]);
+
+  /**
    * Efecto para cargar tatuadores iniciales al montar el componente
    */
   useEffect(() => {
@@ -80,32 +113,7 @@ function HomePage() {
         setFilteredTattooers([]);
       }
     }
-  }, [searchTerm, selectedStyle, selectedDistance, userLocation, tattooZoneApp]);
-
-  /**
-   * Actualiza la lista de tatuadores usando la lógica de la aplicación principal
-   */
-  const updateFilteredTattooers = () => {
-    try {
-      // Actualizar filtros en la aplicación principal
-      const styleFilter = availableStyles.find(s => s.name === selectedStyle) || 
-                         availableStyles[0];
-      
-      tattooZoneApp.updateFilters({
-        searchTerm,
-        selectedStyle: styleFilter,
-        maxDistance: parseInt(selectedDistance),
-        userLocation: tattooZoneApp.userLocation
-      });
-
-      // Obtener tatuadores filtrados usando el método de la aplicación
-      const filtered = tattooZoneApp.searchTattooers();
-      setFilteredTattooers(filtered);
-    } catch (error) {
-      console.error('Error filtrando tatuadores:', error);
-      setFilteredTattooers([]);
-    }
-  };
+  }, [searchTerm, selectedStyle, selectedDistance, userLocation, tattooZoneApp, updateFilteredTattooers]);
 
   /**
    * Obtiene la ubicación usando el método de la aplicación principal
@@ -155,12 +163,7 @@ function HomePage() {
     ? [userLocation.lat, userLocation.lng]
     : [-38.7359, -72.5904]; // Temuco por defecto
 
-  /**
-   * Navega al perfil de un tatuador (página completa)
-   */
-  const handleViewProfile = (tattoerId: number) => {
-    navigate(`/tattooer/${tattoerId}`);
-  };
+  // Navegación a perfil en página completa se manejaría cuando se requiera
 
   /**
    * Muestra el perfil del tatuador en el sidebar (mantiene el mapa visible)
@@ -186,7 +189,7 @@ function HomePage() {
       {/* Header de la aplicación */}
       <header className="header">
         <div className="header-content">
-          <h1 className="logo">TattooZone</h1>
+          <h1 className="logo">Tinta Conectada</h1>
           <nav className="nav">
             {currentUser ? (
               <div className="user-info">
@@ -357,7 +360,7 @@ function HomePage() {
 
       {/* Footer */}
       <footer className="footer">
-        <p>&copy; 2024 TattooZone - Encuentra tu tatuador ideal</p>
+  <p>&copy; 2024 Tinta Conectada - Encuentra tu tatuador ideal</p>
       </footer>
     </>
   );

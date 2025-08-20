@@ -5,10 +5,12 @@
   border-left: 1px solid #333;
   max-width: 350px;
   background-color: #1e1e1e;
-  min-height: calc(100vh - 140px);
-  height: calc(100vh - 140px);
+  /* Usar dvh para iOS Safari y barra de direcciones */
+  min-height: calc(100dvh - 140px);
+  height: calc(100dvh - 140px);
   overflow-y: auto; /* Permitir scroll en el sidebar */
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .search-section,
@@ -125,25 +127,40 @@
   background: linear-gradient(135deg, #5a6fd8, #6a4190);
 }
 
-/* Responsive para sidebar */
+/* Responsive para sidebar (móvil) */
 @media (max-width: 768px) {
-  .main {
-    flex-direction: column;
-    height: auto;
-  }
-  
-  .map-section {
-    position: relative;
-    height: 50vh;
-    flex: none;
-  }
-  
   .sidebar {
+    max-width: 100%;
+    width: 100%;
+    min-height: auto;
+    height: auto;
     border-left: none;
     border-top: 1px solid #333;
-    max-width: none;
-    min-height: 50vh;
-    height: 50vh;
-    overflow-y: auto;
+    order: 2; /* debajo del mapa cuando .main se hace column */
+  }
+
+  .search-section,
+  .filters-section,
+  .results-section {
+    padding: 0.75rem 1rem;
+  }
+
+  .search-input,
+  .filter-select {
+    padding: 0.75rem; /* zonas táctiles */
+    font-size: 1rem;
+  }
+
+  .tattooer-list {
+    gap: 0.75rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .card-actions .btn {
+    min-height: 44px; /* tap target */
+    font-size: 0.95rem;
   }
 }
