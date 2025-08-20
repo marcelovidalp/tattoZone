@@ -5,6 +5,10 @@
   padding: 0;
 }
 
+html, body, #root {
+  height: 100%;
+}
+
 body {
   background-color: #121212;
   color: #e0e0e0;
@@ -12,10 +16,12 @@ body {
 
 /* Layout principal */
 .app {
-  min-height: 100vh;
+  /* Usar unidades dinámicas para iOS Safari y notch */
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   background-color: #121212;
+  padding-bottom: max(env(safe-area-inset-bottom), 0px);
 }
 
 /* Header */
@@ -49,7 +55,8 @@ body {
   flex: 1;
   display: flex;
   background-color: #121212;
-  min-height: calc(100vh - 140px); /* Ajustar para header y footer */
+  /* Usar dvh para cálculo fiable en Safari iOS */
+  min-height: calc(100dvh - 140px); /* Ajustar para header y footer */
 }
 
 .main-content {
@@ -57,14 +64,19 @@ body {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  min-height: 100%;
+  /* Importante para que hijos flex puedan calcular alturas en iOS */
+  min-height: 0;
 }
 
 /* Área del mapa - VISIBLE Y FIJO */
 .map-section {
   flex: 2;
+  /* Fallback */
   min-height: calc(100vh - 140px);
   height: calc(100vh - 140px);
+  /* Preferir unidades seguras en navegadores modernos */
+  min-height: calc(100svh - 140px);
+  height: calc(100svh - 140px);
   position: relative;
   overflow: hidden;
 }
@@ -126,17 +138,18 @@ body {
     flex-direction: column;
     min-height: auto;
   }
-  
+
   .map-section {
-    min-height: 50vh;
-    height: 50vh;
+    /* Asegurar visibilidad del mapa en móvil */
+    min-height: 60svh;
+    height: 60svh;
   }
-  
+
   .header-content {
     flex-direction: column;
     gap: 1rem;
   }
-  
+
   .nav {
     width: 100%;
     justify-content: center;

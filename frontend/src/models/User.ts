@@ -29,7 +29,7 @@ export class User {
    * Contacta a un tatuador vía WhatsApp
    */
   contactViaWhatsApp(tattooer: Tattooer): void {
-    const message = `Hola ${tattooer.name}, soy ${this.name} y vi tu perfil en TattooZone. Me interesa tu trabajo.`;
+  const message = `Hola ${tattooer.name}, soy ${this.name} y vi tu perfil en Tinta Conectada. Me interesa tu trabajo.`;
     const url = `whatsapp://send?phone=${tattooer.phone}&text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   }
